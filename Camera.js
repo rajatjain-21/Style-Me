@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, Alert, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Button, Alert, Dimensions, ActivityIndicator, Picker } from 'react-native';
 import {Image} from "react-native-elements"
 import {ImagePicker, Constants} from "expo";
 import * as Permissions from 'expo-permissions';
@@ -22,7 +22,11 @@ export default class App extends React.Component {
         cameraType: Camera.Constants.Type.back,
         hasCameraPermission: null,
         capturedPhoto: null,
-        loading: false
+        loading: false,
+        mood: "Choose any emotion",
+        uri1: "",
+        uri2: "",
+        uri3: ""
     };
   }
   styles = StyleSheet.create({
@@ -47,11 +51,16 @@ export default class App extends React.Component {
     },
     button: {
       // width: "40%"
-    }
+    },
+    pickerStyle:{  
+        height: 150,  
+        width: "80%",  
+        color: '#344953',  
+        justifyContent: 'center',  
+    }  
   });
 
   componentDidMount() {
-    this.getGalleryPermissionAsync()
     this.getCameraPermissionAsync()
   }
     setFlashMode = (flashMode) => {
@@ -84,17 +93,10 @@ export default class App extends React.Component {
     const hasCameraPermission = (camera.status === 'granted' && audio.status === 'granted');
     this.setState({ hasCameraPermission });
   }
-  getGalleryPermissionAsync = async() => {
-    if(Constants.platform.android) {
-      const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-      if(status!=="granted") {
-        Alert.alert("Sorry, we could not access permissions")
-      }
-    }
-  }
 
   async hackItUp(data) {
-    console.log("Clicked")
+    console.log("Clicked", data.emotion)
+    const {navigate} = this.props.navigation;
     this.setState({loading: true})
     // const response = await fetch(url).then(res => res.json()).then(res => console.log(res))
     const response = await fetch(url,{
@@ -103,20 +105,14 @@ export default class App extends React.Component {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
-    }).then((resp) => console.log(resp))
-  }
-  
-  pickImage = async() => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowEditing: true,
-      aspect: [4, 3]
     })
-    console.log(result)
-    if(!result.cancelled) {
-      this.setState({image: result.uri})
-    }
+    this.setState({loading: false}, () => navigate("Result",{
+      uri1: `http://shahidikram0701.pythonanywhere.com/static/content_image.jpg?query=${Math.random()}`,
+      uri2: `http://shahidikram0701.pythonanywhere.com/static/style.jpg?query=${Math.random()}`,
+      uri3: `http://shahidikram0701.pythonanywhere.com/static/generated_image.jpg?query=${Math.random()}`
+    }))
   }
+
   render() {
     const { hasCameraPermission, flashMode, cameraType, capturing } = this.state;
     if (hasCameraPermission === null) {
@@ -125,13 +121,46 @@ export default class App extends React.Component {
         return <Text>Access to camera has been denied.</Text>;
     }
     else if(this.state.capturedPhoto) {
-      return (
+      if(this.state.loading) {
+        return (
+        <View style={this.styles.container}>
+          <Text>Hacking it up for you...</Text>
+          <ActivityIndicator size="large" color="#CC6751" />
+        </View>)
+      }
+      else return (
         <View style={this.styles.container}>
           <Image source={{uri: this.state.capturedPhoto}} style={{ width: 400, height: 400}} PlaceholderContent={<ActivityIndicator />}/>
-          <View style={this.styles.buttonContainer}>
-            <View><Button style={this.styles.button} title="Go back to camera" onPress={() => this.setState({capturedPhoto: null})} /></View>
-            <View style={{marginLeft: 10}}><Button style={this.styles.button} title="Hack it up" onPress={() => this.hackItUp({image: this.state.captures[0].base64})} /></View>
+          <View>
+            <Picker
+                style={this.styles.pickerStyle} 
+                selectedValue={this.state.mood}
+                style={{height: 50, width: 100}}
+                onValueChange={(itemValue) =>
+                    this.setState({mood: ""}, () => this.setState({mood: itemValue}, () => this.hackItUp({image: this.state.captures[0].base64, emotion: this.state.mood})))
+                }>
+                <Picker.Item label="Choose an emotion" value="choose" />
+                <Picker.Item label="anger" value="anger" />
+                <Picker.Item label="contempt" value="contempt" />
+                <Picker.Item label="disgust" value="disgust" />
+                <Picker.Item label="fear" value="fear" />
+                <Picker.Item label="surprise" value="surprise" />
+                <Picker.Item label="neutral" value="neutral" />
+                <Picker.Item label="sadness" value="sadness" />
+                <Picker.Item label="happiness" value="happiness" />
+
+            </Picker>
           </View>
+          {/* <View style={this.styles.buttonContainer}>
+            <View><Button style={this.styles.button} title="Go back to camera" onPress={() => this.setState({capturedPhoto: null})} /></View>
+            <View style={{marginLeft: 10}}><Button style={this.styles.button} title="Hack it up" onPress={() => {
+                navigate("Result",{
+                  uri1: `http://shahidikram0701.pythonanywhere.com/static/content_image.jpg?query=${Math.random()}`,
+                  uri2: "3.jpg",
+                  uri3: `http://shahidikram0701.pythonanywhere.com/static/generated_image.jpg?query=${Math.random()}`
+                })
+              }} /></View>
+          </View> */}
         </View>
       )
     }
