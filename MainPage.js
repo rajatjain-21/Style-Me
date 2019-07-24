@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text, StyleSheet, View, Alert, Button} from "react-native";
-import {Icon, Image} from "react-native-elements"
+import {Icon} from "react-native-elements"
 import {ImagePicker, Constants} from "expo";
 import * as Permissions from 'expo-permissions';
 export default class MainPage extends React.Component {
@@ -13,10 +13,13 @@ export default class MainPage extends React.Component {
   styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#CC6751',
+      backgroundColor: '#201f45',
       alignItems: 'center',
       justifyContent: 'center'
-    }
+    },
+    baseText: {
+      fontFamily: 'Cochin',
+    },
   });
   componentDidMount() {
     this.getGalleryPermissionAsync()
@@ -32,33 +35,30 @@ export default class MainPage extends React.Component {
   }
 
   pickImage = async() => {
+    const {navigate} = this.props.navigation;
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowEditing: true,
-      aspect: [4, 3]
+      aspect: [4, 3],
+      base64: true
     })
-    console.log(result)
     if(!result.cancelled) {
-      this.setState({image: result.uri})
+      this.setState({image: result.uri}, () => navigate('FromGallery', {
+          image: result
+      }))
     }
   }
   
   render() {
     const {navigate} = this.props.navigation;
-    if(this.state.image) {
-        return (
-            <View>
-                <Image style={this.styles.image} source={{uri: this.state.image}} style={{ width: 400, height: 400}} />
-                <Button title="Hack it up" />
-            </View>
-        )
-    }
-    else return (
+    return (
         <View style={this.styles.container}>
-            <Text style={{fontSize: 40, fontWeight: "bold", color: "white"}}>Awesome App</Text>
-            <View style={{marginTop: 25}}>
-                <Icon name='camera' reverse reverseColor="white" size={40} type='font-awesome' raised onPress={() => navigate("Camera")} />
-                <Icon name='search' reverse reverseColor="white" size={40} type='font-awesome' raised onPress={this.pickImage} />
+            <Text style={{fontSize: 60, fontWeight: "bold", color: "white",fontFamily: "sans-serif-condensed"}}>Style Me</Text>
+            <Text style={{fontSize: 20, fontStyle: "italic", color: "white"}}>A solution to your styling needs</Text>
+            <View style={{marginTop: 60, flexDirection: "row"}}>
+                <View><Icon name='camera' size={40} type='font-awesome' color="#fff" onPress={() => navigate("Camera")} /></View>
+                <View style={{marginLeft: 50}}><Icon name='file' size={40} color="#fff" type='font-awesome'  onPress={this.pickImage} /></View>
+                {/* <Button icon="add-a-photo" /> */}
             </View>
         </View>
     )

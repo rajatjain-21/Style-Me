@@ -1,13 +1,24 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, Alert, Dimensions, ActivityIndicator, Picker } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Picker } from 'react-native';
 import {Image} from "react-native-elements"
 import {ImagePicker, Constants} from "expo";
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
 import Toolbar from './Toolbar';
+import {
+  BallIndicator,
+  BarIndicator,
+  DotIndicator,
+  MaterialIndicator,
+  PacmanIndicator,
+  PulseIndicator,
+  SkypeIndicator,
+  UIActivityIndicator,
+  WaveIndicator,
+} from 'react-native-indicators';
 
 const { width: winWidth, height: winHeight } = Dimensions.get('window');
-const url = "http://shahidikram0701.pythonanywhere.com/style_image"
+const url = "http://shahidikram0701.pythonanywhere.com/style_image_with_emotion"
 
 export default class App extends React.Component {
   constructor(props) {
@@ -124,14 +135,15 @@ export default class App extends React.Component {
       if(this.state.loading) {
         return (
         <View style={this.styles.container}>
-          <Text>Hacking it up for you...</Text>
-          <ActivityIndicator size="large" color="#CC6751" />
+          <Text style={{fontSize: 20, fontStyle: "italic", fontWeight: "bold"}}>Hacking it up for you...</Text>
+          <PacmanIndicator color="#201f45" />
         </View>)
       }
       else return (
         <View style={this.styles.container}>
-          <Image source={{uri: this.state.capturedPhoto}} style={{ width: 400, height: 400}} PlaceholderContent={<ActivityIndicator />}/>
-          <View>
+          <Image source={{uri: this.state.capturedPhoto}} style={{ width: 400, height: 400}} PlaceholderContent={<SkypeIndicator color="#201f45" />}/>
+          <View style={{marginTop: 20}}>
+          <Text style={{fontSize: 20}}>Pick an emotion</Text>
             <Picker
                 style={this.styles.pickerStyle} 
                 selectedValue={this.state.mood}
@@ -139,28 +151,18 @@ export default class App extends React.Component {
                 onValueChange={(itemValue) =>
                     this.setState({mood: ""}, () => this.setState({mood: itemValue}, () => this.hackItUp({image: this.state.captures[0].base64, emotion: this.state.mood})))
                 }>
-                <Picker.Item label="Choose an emotion" value="choose" />
-                <Picker.Item label="anger" value="anger" />
-                <Picker.Item label="contempt" value="contempt" />
-                <Picker.Item label="disgust" value="disgust" />
-                <Picker.Item label="fear" value="fear" />
-                <Picker.Item label="surprise" value="surprise" />
-                <Picker.Item label="neutral" value="neutral" />
-                <Picker.Item label="sadness" value="sadness" />
-                <Picker.Item label="happiness" value="happiness" />
-
+                <Picker.Item label="🎈 Choose an emotion" value="choose" />
+                <Picker.Item label="😡 anger" value="anger" />
+                <Picker.Item label="🙄 contempt" value="contempt" />
+                <Picker.Item label="😣 disgust" value="disgust" />
+                <Picker.Item label="😨 fear" value="fear" />
+                <Picker.Item label="😱 surprise" value="surprise" />
+                <Picker.Item label="😶 neutral" value="neutral" />
+                <Picker.Item label="😢 sadness" value="sadness" />
+                <Picker.Item label="😀 happiness" value="happiness" />
+                <Picker.Item label="🎰 random" value="random" />
             </Picker>
           </View>
-          {/* <View style={this.styles.buttonContainer}>
-            <View><Button style={this.styles.button} title="Go back to camera" onPress={() => this.setState({capturedPhoto: null})} /></View>
-            <View style={{marginLeft: 10}}><Button style={this.styles.button} title="Hack it up" onPress={() => {
-                navigate("Result",{
-                  uri1: `http://shahidikram0701.pythonanywhere.com/static/content_image.jpg?query=${Math.random()}`,
-                  uri2: "3.jpg",
-                  uri3: `http://shahidikram0701.pythonanywhere.com/static/generated_image.jpg?query=${Math.random()}`
-                })
-              }} /></View>
-          </View> */}
         </View>
       )
     }
